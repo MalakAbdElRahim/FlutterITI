@@ -49,6 +49,10 @@ class MovieModel {
 
     String get releaseYear => releaseDate != null ? releaseDate!.year.toString() : 'N/A';
 
+    String get fullReleaseDate => releaseDate != null
+        ? "${releaseDate!.year}-${releaseDate!.month.toString().padLeft(2, '0')}-${releaseDate!.day.toString().padLeft(2, '0')}"
+        : 'N/A';
+
     factory MovieModel.fromJson(Map<String, dynamic> json) => MovieModel(
         adult: json["adult"] ?? false,
         backdropPath: json["backdrop_path"],

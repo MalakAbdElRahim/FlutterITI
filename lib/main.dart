@@ -1,12 +1,23 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
 
 import 'firebase_options.dart';
 import 'Views/SplashScreen.dart';
-
 import 'AppTheme.dart';
 import 'Provider/FirebaseAuthProvider.dart';
+import 'Provider/MovieProvider.dart';
+
+class AppScrollBehavior extends MaterialScrollBehavior {
+  @override
+  Set<PointerDeviceKind> get dragDevices => {
+    PointerDeviceKind.touch,
+    PointerDeviceKind.mouse,
+    PointerDeviceKind.trackpad,
+    PointerDeviceKind.stylus,
+  };
+}
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,14 +29,15 @@ void main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => FirebaseAuthProvider()),
+        ChangeNotifierProvider(create: (_) => MovieProvider()),
       ],
-      child: const MyApp(),
+      child: MyApp(),
     ),
   );
 }
 
 class MyApp extends StatefulWidget {
-  const MyApp({super.key});
+  MyApp({super.key});
 
   @override
   State<MyApp> createState() => _MyAppState();
@@ -47,6 +59,7 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       title: 'One Tap Cinema',
       debugShowCheckedModeBanner: false,
+      scrollBehavior: AppScrollBehavior(),
 
       theme: AppTheme.lightMode,
       darkTheme: AppTheme.darkMode,
