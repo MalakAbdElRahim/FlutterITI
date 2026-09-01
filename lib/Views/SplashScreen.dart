@@ -39,25 +39,19 @@ class _SplashScreenState extends State<SplashScreen> {
           _isInitialized = true;
         });
       }
-
-      // Phase 1: Show TMDB Logo exclusively for 2.2 seconds
       Timer(Duration(milliseconds: 2200), () {
         if (!mounted) return;
         setState(() {
-          _showLogoPhase = false; // Transition to Phase 2 (Video & Loading)
+          _showLogoPhase = false;
         });
 
         _controller.play();
-
-        // Listen for video completion to navigate
         _controller.addListener(() {
           if (_controller.value.isInitialized &&
               _controller.value.position >= _controller.value.duration) {
             _navigateNext();
           }
         });
-
-        // Fallback timer based on video length (or 4 seconds)
         final duration = _controller.value.duration.inSeconds > 0
             ? _controller.value.duration.inSeconds + 1
             : 4;
@@ -66,7 +60,6 @@ class _SplashScreenState extends State<SplashScreen> {
         });
       });
     } catch (e) {
-      // Fallback if video fails to initialize
       Timer(Duration(milliseconds: 2200), () {
         if (!mounted) return;
         setState(() {
@@ -114,7 +107,6 @@ class _SplashScreenState extends State<SplashScreen> {
         child: AnimatedSwitcher(
           duration: Duration(milliseconds: 600),
           child: _showLogoPhase
-              // STAGE 1: TMDB Logo & attribution only
               ? Column(
                   key: ValueKey('logo_phase'),
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -135,7 +127,7 @@ class _SplashScreenState extends State<SplashScreen> {
                     ),
                   ],
                 )
-              // STAGE 2: Video, opening message, and circular loading
+
               : Column(
                   key: ValueKey('video_phase'),
                   mainAxisAlignment: MainAxisAlignment.center,
