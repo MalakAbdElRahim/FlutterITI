@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../Service/FirebaseAuthService.dart';
+import '../Provider/WatchlistProvider.dart';
 import 'LoginScreen.dart';
 import 'WatchingScreen.dart';
 import 'ToWatchScreen.dart';
@@ -25,6 +27,7 @@ class _WatchListScreenState extends State<WatchListScreen> {
   Widget _buildListCard({
     required String title,
     required String description,
+    required int count,
     required IconData icon,
     required Color color,
     required VoidCallback onTap,
@@ -81,9 +84,25 @@ class _WatchListScreenState extends State<WatchListScreen> {
                   ],
                 ),
               ),
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  "$count",
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: color,
+                    fontSize: 14,
+                  ),
+                ),
+              ),
+              SizedBox(width: 8),
               Icon(
                 Icons.arrow_forward_ios,
-                size: 18,
+                size: 16,
                 color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
               ),
             ],
@@ -96,6 +115,7 @@ class _WatchListScreenState extends State<WatchListScreen> {
   @override
   Widget build(BuildContext context) {
     bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final watchlistProvider = context.watch<WatchlistProvider>();
 
     return Scaffold(
       appBar: AppBar(
@@ -105,21 +125,6 @@ class _WatchListScreenState extends State<WatchListScreen> {
             icon: Icon(isDarkMode ? Icons.light_mode : Icons.dark_mode),
             tooltip: 'Toggle Theme',
             onPressed: widget.toggleTheme,
-          ),
-          IconButton(
-            icon: Icon(Icons.logout_outlined),
-            tooltip: 'Logout',
-            onPressed: () async {
-              await _authService.logOut();
-              if (mounted) {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => LoginScreen(toggleTheme: widget.toggleTheme),
-                  ),
-                );
-              }
-            },
           ),
         ],
         leading: IconButton(
@@ -154,6 +159,7 @@ class _WatchListScreenState extends State<WatchListScreen> {
             _buildListCard(
               title: "Currently Watching",
               description: "Movies you are currently watching",
+              count: watchlistProvider.watching.length,
               icon: Icons.play_circle_fill,
               color: Colors.blueAccent,
               onTap: () {
@@ -171,6 +177,7 @@ class _WatchListScreenState extends State<WatchListScreen> {
             _buildListCard(
               title: "Want to Watch",
               description: "Movies saved to watch later",
+              count: watchlistProvider.toWatch.length,
               icon: Icons.bookmark,
               color: Colors.orangeAccent,
               onTap: () {
@@ -188,6 +195,7 @@ class _WatchListScreenState extends State<WatchListScreen> {
             _buildListCard(
               title: "Watched",
               description: "Movies you have completed",
+              count: watchlistProvider.watched.length,
               icon: Icons.check_circle,
               color: Colors.green,
               onTap: () {

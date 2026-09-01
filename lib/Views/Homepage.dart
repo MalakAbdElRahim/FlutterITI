@@ -6,7 +6,7 @@ import '../Controller/MovieController.dart';
 import '../Widgets/MovieSection.dart';
 import 'FavoritesScreen.dart';
 import 'WatchListScreen.dart';
-import 'LoginScreen.dart';
+import 'ProfileScreen.dart';
 import 'SearchResultsScreen.dart';
 import 'SearchByGenreScreen.dart';
 
@@ -75,18 +75,15 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
         leading: IconButton(
-          icon: Icon(Icons.logout_outlined),
-          tooltip: 'Logout',
-          onPressed: () async {
-            await _authService.logOut();
-            if (mounted) {
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => LoginScreen(toggleTheme: widget.toggleTheme),
-                ),
-              );
-            }
+          icon: Icon(Icons.account_circle_outlined, size: 28),
+          tooltip: 'Profile',
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => ProfileScreen(toggleTheme: widget.toggleTheme),
+              ),
+            );
           },
         ),
       ),

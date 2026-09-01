@@ -8,6 +8,7 @@ import 'Views/SplashScreen.dart';
 import 'AppTheme.dart';
 import 'Provider/FirebaseAuthProvider.dart';
 import 'Provider/MovieProvider.dart';
+import 'Provider/WatchlistProvider.dart';
 
 class AppScrollBehavior extends MaterialScrollBehavior {
   @override
@@ -30,6 +31,7 @@ void main() async {
       providers: [
         ChangeNotifierProvider(create: (_) => FirebaseAuthProvider()),
         ChangeNotifierProvider(create: (_) => MovieProvider()),
+        ChangeNotifierProvider(create: (_) => WatchlistProvider()),
       ],
       child: MyApp(),
     ),

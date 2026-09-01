@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../Model/MovieModel.dart';
 import '../Model/GenreModel.dart';
+import '../Model/CastModel.dart';
 
 class TMDBApiService {
   final String apiKey = "d155a946047c94a3341a8d3e9dd22b93";
@@ -125,5 +126,27 @@ class TMDBApiService {
       throw Exception("Failed to load genre movies: HTTP ${response.statusCode}");
     }
   }
-}
 
+  Future<CastModel> getMovieCredits(int movieId) async {
+    final url = Uri.parse("https://api.themoviedb.org/3/movie/$movieId/credits?api_key=$apiKey");
+    final response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      return CastModel.fromJson(data);
+    } else {
+      throw Exception("Failed to load movie credits: HTTP ${response.statusCode}");
+    }
+  }
+
+  Future<Map<String, dynamic>> getMovieDetailsFull(int movieId) async {
+    final url = Uri.parse("https://api.themoviedb.org/3/movie/$movieId?api_key=$apiKey&append_to_response=credits");
+    final response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception("Failed to load full movie details: HTTP ${response.statusCode}");
+    }
+  }
+}
