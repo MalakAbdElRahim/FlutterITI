@@ -48,7 +48,7 @@ class WatchListScreen extends StatelessWidget {
             ),
             const SizedBox(height: 6),
             Text(
-              "Track movies you're watching, want to watch, or completed",
+              "Track your Movies",
               style: TextStyle(
                 fontSize: 14,
                 color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),

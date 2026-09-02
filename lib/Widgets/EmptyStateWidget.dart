@@ -4,14 +4,12 @@ class EmptyStateWidget extends StatelessWidget {
   final IconData icon;
   final Color iconColor;
   final String title;
-  final String subtitle;
 
   const EmptyStateWidget({
     super.key,
     required this.icon,
     required this.iconColor,
     required this.title,
-    required this.subtitle,
   });
 
   @override
@@ -26,14 +24,7 @@ class EmptyStateWidget extends StatelessWidget {
             title,
             style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
-          const SizedBox(height: 8),
-          Text(
-            subtitle,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
-            ),
-          ),
+          
         ],
       ),
     );

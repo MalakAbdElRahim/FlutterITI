@@ -95,4 +95,60 @@ class AuthController {
     await _authService.logOut();
     _authProvider.setUser(null);
   }
+
+  Future<bool> confirmCurrentPassword(String password) async {
+    if (password.trim().isEmpty) {
+      _authProvider.setWarning('Please enter your current password.');
+      return false;
+    }
+
+    _authProvider.clearWarning();
+    _authProvider.setLoading(true);
+
+    try {
+      await _authService.confirmCurrentPassword(password);
+      return true;
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'wrong-password' || e.code == 'invalid-credential') {
+        _authProvider.setWarning('The current password entered is incorrect.');
+      } else {
+        _authProvider.setWarning(e.message ?? 'Confirmation failed.');
+      }
+      return false;
+    } catch (e) {
+      _authProvider.setWarning(e.toString().replaceAll('Exception: ', ''));
+      return false;
+    } finally {
+      _authProvider.setLoading(false);
+    }
+  }
+
+  Future<bool> updatePassword(String newPassword) async {
+    if (newPassword.trim().isEmpty) {
+      _authProvider.setWarning('Please enter your new password.');
+      return false;
+    }
+
+    final passwordError = verifyPassword(newPassword);
+    if (passwordError.isNotEmpty) {
+      _authProvider.setWarning(passwordError);
+      return false;
+    }
+
+    _authProvider.clearWarning();
+    _authProvider.setLoading(true);
+
+    try {
+      await _authService.updatePassword(newPassword);
+      return true;
+    } on FirebaseAuthException catch (e) {
+      _authProvider.setWarning(e.message ?? 'Failed to update password.');
+      return false;
+    } catch (e) {
+      _authProvider.setWarning(e.toString().replaceAll('Exception: ', ''));
+      return false;
+    } finally {
+      _authProvider.setLoading(false);
+    }
+  }
 }

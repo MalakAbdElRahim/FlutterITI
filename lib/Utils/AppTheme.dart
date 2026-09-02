@@ -10,7 +10,7 @@ class AppTheme {
       secondary: Color.fromARGB(255, 219, 182, 58),
       onSecondary: Color.fromARGB(255, 28, 25, 23),
       tertiary: Color.fromARGB(255, 211, 211, 209),
-      surface: Color.fromARGB(135, 255, 221, 180),
+      surface: Color.fromARGB(255, 250, 246, 240),
     ),
     appBarTheme: AppBarTheme(
       backgroundColor: Color.fromARGB(255, 250, 250, 249),

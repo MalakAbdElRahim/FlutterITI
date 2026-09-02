@@ -42,7 +42,6 @@ class Favorites extends StatelessWidget {
               icon: Icons.favorite_outline,
               iconColor: Colors.redAccent,
               title: 'No Favorites Yet',
-              subtitle: 'Tap the Favorite button on any movie to save it here',
             )
           : MovieGridView(
               movies: movies,

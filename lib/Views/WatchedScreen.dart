@@ -42,7 +42,6 @@ class Watched extends StatelessWidget {
               icon: Icons.check_circle_outline,
               iconColor: Colors.green,
               title: 'No Watched Movies',
-              subtitle: 'Movies you finish watching will appear here',
             )
           : MovieGridView(
               movies: movies,

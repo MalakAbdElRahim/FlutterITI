@@ -9,6 +9,14 @@ class FirebaseAuthProvider extends ChangeNotifier {
   String _warning = '';
   User? _user;
 
+  FirebaseAuthProvider() {
+    _user = _authService.currentUser;
+    FirebaseAuth.instance.authStateChanges().listen((user) {
+      _user = user;
+      notifyListeners();
+    });
+  }
+
   bool get isLoading => _isLoading;
   String get warning => _warning;
   User? get user => _user;

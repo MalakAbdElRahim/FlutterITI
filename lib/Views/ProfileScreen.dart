@@ -8,6 +8,8 @@ import 'FavoritesScreen.dart';
 import 'WatchingScreen.dart';
 import 'ToWatchScreen.dart';
 import 'WatchedScreen.dart';
+import 'ChangePasswordScreen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class ProfileScreen extends StatelessWidget {
   final VoidCallback toggleTheme;
@@ -20,12 +22,14 @@ class ProfileScreen extends StatelessWidget {
     final watchlistProvider = context.watch<WatchlistProvider>();
     final authProvider = context.watch<FirebaseAuthProvider>();
 
-    final email = authProvider.user?.email ?? 'guest@onetapcinema.com';
+    final email = authProvider.user?.email ??
+        FirebaseAuth.instance.currentUser?.email ??
+        'guest';
     final initial = email.isNotEmpty ? email[0].toUpperCase() : 'U';
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Profile'),
+        title: Text('Profile'),
         actions: [
           IconButton(
             icon: Icon(isDarkMode ? Icons.light_mode : Icons.dark_mode),
@@ -34,13 +38,13 @@ class ProfileScreen extends StatelessWidget {
           ),
         ],
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: Icon(Icons.arrow_back),
           tooltip: 'Back',
           onPressed: () => Navigator.pop(context),
         ),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
+        padding: EdgeInsets.all(20),
         child: Column(
           children: [
             Center(
@@ -58,30 +62,34 @@ class ProfileScreen extends StatelessWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 12),
+                  SizedBox(height: 12),
                   Text(
                     email,
-                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'One Tap Cinema Member',
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
-                    ),
-                  ),
+                  SizedBox(height: 4),
                 ],
               ),
             ),
 
-            const SizedBox(height: 28),
+            SizedBox(height: 28),
 
             InfoTileWidget(
-              icon: Icons.email_outlined,
-              iconColor: Colors.teal,
-              title: 'Email',
-              value: email,
+              icon: Icons.lock_outline,
+              iconColor: Colors.blueAccent,
+              title: 'Change Password',
+              value: '',
+              onTap: () {
+                authProvider.clearWarning();
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ChangePasswordScreen(
+                      toggleTheme: toggleTheme,
+                    ),
+                  ),
+                );
+              },
             ),
             InfoTileWidget(
               icon: Icons.favorite,
@@ -144,7 +152,7 @@ class ProfileScreen extends StatelessWidget {
               ),
             ),
 
-            const SizedBox(height: 32),
+            SizedBox(height: 32),
 
             SizedBox(
               width: double.infinity,
@@ -166,8 +174,8 @@ class ProfileScreen extends StatelessWidget {
                   side: BorderSide(color: Colors.red.withValues(alpha: 0.5), width: 1.5),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                 ),
-                icon: const Icon(Icons.logout, color: Colors.red),
-                label: const Text(
+                icon: Icon(Icons.logout, color: Colors.red),
+                label: Text(
                   'Log Out',
                   style: TextStyle(
                     color: Colors.red,
@@ -178,7 +186,7 @@ class ProfileScreen extends StatelessWidget {
               ),
             ),
 
-            const SizedBox(height: 20),
+            SizedBox(height: 20),
           ],
         ),
       ),

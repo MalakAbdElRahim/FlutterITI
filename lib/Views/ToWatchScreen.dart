@@ -42,7 +42,7 @@ class ToWatch extends StatelessWidget {
               icon: Icons.bookmark_outline,
               iconColor: Colors.orangeAccent,
               title: 'No Movies in Want to Watch',
-              subtitle: "Save movies to your 'To Watch' list to watch them later",
+
             )
           : MovieGridView(
               movies: movies,

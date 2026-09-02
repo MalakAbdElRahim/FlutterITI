@@ -154,8 +154,8 @@ class _SearchByGenreViewState extends State<_SearchByGenreView> {
                       const SizedBox(height: 16),
                       Expanded(
                         child: GridView.builder(
-                          physics: const BouncingScrollPhysics(),
-                          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                          physics: BouncingScrollPhysics(),
+                          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                             crossAxisCount: 2,
                             crossAxisSpacing: 12,
                             mainAxisSpacing: 12,

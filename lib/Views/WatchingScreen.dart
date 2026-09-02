@@ -42,7 +42,6 @@ class WatchingScreen extends StatelessWidget {
               icon: Icons.play_circle_outline,
               iconColor: Colors.blueAccent,
               title: 'No Movies Currently Watching',
-              subtitle: "Mark movies as 'Watching' to track what you're currently viewing",
             )
           : MovieGridView(
               movies: movies,
