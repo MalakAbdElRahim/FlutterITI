@@ -24,13 +24,19 @@ class _SplashScreenState extends State<SplashScreen> {
   void initState() {
     super.initState();
     _initializeAndPlay();
+    // Absolute failsafe: Never stay stuck on splash screen longer than 6 seconds
+    Timer(const Duration(seconds: 6), () {
+      if (mounted && !_hasNavigated) {
+        _navigateNext();
+      }
+    });
   }
 
   void _initializeAndPlay() async {
     _controller = VideoPlayerController.asset('assets/videos/splash.mp4');
 
     try {
-      await _controller.initialize();
+      await _controller.initialize().timeout(const Duration(seconds: 3));
       await _controller.setVolume(0.0);
       _controller.setLooping(false);
 
@@ -39,7 +45,7 @@ class _SplashScreenState extends State<SplashScreen> {
           _isInitialized = true;
         });
       }
-      Timer(Duration(milliseconds: 2200), () {
+      Timer(const Duration(milliseconds: 2200), () {
         if (!mounted) return;
         setState(() {
           _showLogoPhase = false;
@@ -60,12 +66,12 @@ class _SplashScreenState extends State<SplashScreen> {
         });
       });
     } catch (e) {
-      Timer(Duration(milliseconds: 2200), () {
+      Timer(const Duration(milliseconds: 2200), () {
         if (!mounted) return;
         setState(() {
           _showLogoPhase = false;
         });
-        Timer(Duration(seconds: 3), () {
+        Timer(const Duration(seconds: 3), () {
           _navigateNext();
         });
       });
@@ -75,20 +81,31 @@ class _SplashScreenState extends State<SplashScreen> {
   void _navigateNext() {
     if (!mounted || _hasNavigated) return;
     _hasNavigated = true;
-    final user = FirebaseAuth.instance.currentUser;
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (context) => user != null
-            ? HomePage(
-                title: "Main Page",
-                toggleTheme: widget.toggleTheme,
-              )
-            : LoginScreen(
-                toggleTheme: widget.toggleTheme,
-              ),
-      ),
-    );
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => user != null
+              ? HomePage(
+                  title: "Main Page",
+                  toggleTheme: widget.toggleTheme,
+                )
+              : LoginScreen(
+                  toggleTheme: widget.toggleTheme,
+                ),
+        ),
+      );
+    } catch (_) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => LoginScreen(
+            toggleTheme: widget.toggleTheme,
+          ),
+        ),
+      );
+    }
   }
 
   @override
