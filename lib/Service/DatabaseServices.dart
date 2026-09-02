@@ -18,6 +18,7 @@ class DatabaseServices {
     }
 
     try {
+      
       _database = await _initDatabase();
       return _database;
     } catch (e) {
