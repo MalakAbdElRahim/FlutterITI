@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../Service/FirebaseAuthService.dart';
 
 class FirebaseAuthProvider extends ChangeNotifier {
+  final FirebaseAuthService _authService = FirebaseAuthService();
+
   bool _isLoading = false;
-  String _warning = "";
+  String _warning = '';
   User? _user;
 
   bool get isLoading => _isLoading;
@@ -27,7 +30,13 @@ class FirebaseAuthProvider extends ChangeNotifier {
   }
 
   void clearWarning() {
-    _warning = "";
+    _warning = '';
+    notifyListeners();
+  }
+
+  Future<void> signOut() async {
+    await _authService.logOut();
+    _user = null;
     notifyListeners();
   }
 }

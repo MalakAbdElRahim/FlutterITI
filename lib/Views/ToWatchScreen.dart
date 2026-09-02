@@ -1,100 +1,60 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../Service/FirebaseAuthService.dart';
 import '../Provider/WatchlistProvider.dart';
-import '../Widgets/MovieCard.dart';
+import '../Widgets/MovieGridView.dart';
+import '../Widgets/EmptyStateWidget.dart';
 import 'MovieDetailsScreen.dart';
-import 'LoginScreen.dart';
 
-class ToWatch extends StatefulWidget {
+class ToWatch extends StatelessWidget {
   final VoidCallback toggleTheme;
   final String title;
 
-  ToWatch({
+  const ToWatch({
     super.key,
     required this.title,
     required this.toggleTheme,
   });
 
   @override
-  State<ToWatch> createState() => _ToWatchState();
-}
-
-class _ToWatchState extends State<ToWatch> {
-  final FirebaseAuthService _authService = FirebaseAuthService();
-
-  @override
   Widget build(BuildContext context) {
-    bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final watchlistProvider = context.watch<WatchlistProvider>();
     final movies = watchlistProvider.toWatch;
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title),
+        title: Text(title),
         actions: [
           IconButton(
             icon: Icon(isDarkMode ? Icons.light_mode : Icons.dark_mode),
             tooltip: 'Toggle Theme',
-            onPressed: widget.toggleTheme,
+            onPressed: toggleTheme,
           ),
         ],
         leading: IconButton(
-          icon: Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back),
           tooltip: 'Back',
-          onPressed: () {
-            Navigator.pop(context);
-          },
+          onPressed: () => Navigator.pop(context),
         ),
       ),
       body: movies.isEmpty
-          ? Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.bookmark_outline, size: 64, color: Colors.orangeAccent),
-                  SizedBox(height: 16),
-                  Text(
-                    "No Movies in Want to Watch",
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                  ),
-                  SizedBox(height: 8),
-                  Text(
-                    "Save movies to your 'To Watch' list to watch them later",
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
-                    ),
-                  ),
-                ],
-              ),
+          ? const EmptyStateWidget(
+              icon: Icons.bookmark_outline,
+              iconColor: Colors.orangeAccent,
+              title: 'No Movies in Want to Watch',
+              subtitle: "Save movies to your 'To Watch' list to watch them later",
             )
-          : GridView.builder(
-              padding: EdgeInsets.all(12),
-              physics: BouncingScrollPhysics(),
-              gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                maxCrossAxisExtent: 180,
-                childAspectRatio: 0.48,
-                crossAxisSpacing: 12,
-                mainAxisSpacing: 12,
+          : MovieGridView(
+              movies: movies,
+              onMovieTap: (movie) => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => MovieDetailsScreen(
+                    movie: movie,
+                    toggleTheme: toggleTheme,
+                  ),
+                ),
               ),
-              itemCount: movies.length,
-              itemBuilder: (context, index) {
-                final movie = movies[index];
-                return MovieCard(
-                  movie: movie,
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => MovieDetailsScreen(
-                          movie: movie,
-                          toggleTheme: widget.toggleTheme,
-                        ),
-                      ),
-                    );
-                  },
-                );
-              },
             ),
     );
   }

@@ -6,7 +6,7 @@ class MovieProvider extends ChangeNotifier {
   List<MovieModel> _nowPlayingMovies = [];
   List<MovieModel> _topRatedMovies = [];
   bool _isLoading = false;
-  String _errorMessage = "";
+  String _errorMessage = '';
 
   List<MovieModel> get popularMovies => _popularMovies;
   List<MovieModel> get nowPlayingMovies => _nowPlayingMovies;
@@ -32,7 +32,7 @@ class MovieProvider extends ChangeNotifier {
     _popularMovies = popular;
     _nowPlayingMovies = nowPlaying;
     _topRatedMovies = topRated;
-    _errorMessage = "";
+    _errorMessage = '';
     _isLoading = false;
     notifyListeners();
   }

@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
 
-import 'firebase_options.dart';
+import 'Service/firebase_options.dart';
 import 'Views/SplashScreen.dart';
-import 'AppTheme.dart';
+import 'Utils/AppTheme.dart';
 import 'Provider/FirebaseAuthProvider.dart';
 import 'Provider/MovieProvider.dart';
 import 'Provider/WatchlistProvider.dart';
@@ -13,11 +13,11 @@ import 'Provider/WatchlistProvider.dart';
 class AppScrollBehavior extends MaterialScrollBehavior {
   @override
   Set<PointerDeviceKind> get dragDevices => {
-    PointerDeviceKind.touch,
-    PointerDeviceKind.mouse,
-    PointerDeviceKind.trackpad,
-    PointerDeviceKind.stylus,
-  };
+        PointerDeviceKind.touch,
+        PointerDeviceKind.mouse,
+        PointerDeviceKind.trackpad,
+        PointerDeviceKind.stylus,
+      };
 }
 
 void main() async {
@@ -50,9 +50,7 @@ class _MyAppState extends State<MyApp> {
 
   void toggleTheme() {
     setState(() {
-      _themeMode = _themeMode == ThemeMode.light
-          ? ThemeMode.dark
-          : ThemeMode.light;
+      _themeMode = _themeMode == ThemeMode.light ? ThemeMode.dark : ThemeMode.light;
     });
   }
 
@@ -62,13 +60,10 @@ class _MyAppState extends State<MyApp> {
       title: 'One Tap Cinema',
       debugShowCheckedModeBanner: false,
       scrollBehavior: AppScrollBehavior(),
-
       theme: AppTheme.lightMode,
       darkTheme: AppTheme.darkMode,
       themeMode: _themeMode,
-
       home: SplashScreen(toggleTheme: toggleTheme),
     );
   }
 }
-

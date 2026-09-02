@@ -36,7 +36,7 @@ class _SignupScreenState extends State<SignupScreen> {
         context,
         MaterialPageRoute(
           builder: (context) => HomePage(
-            title: "Main Page",
+            title: 'Main Page',
             toggleTheme: widget.toggleTheme,
           ),
         ),
@@ -52,8 +52,8 @@ class _SignupScreenState extends State<SignupScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          "Movie player",
+        title: const Text(
+          'Movie player',
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         actions: [
@@ -65,7 +65,7 @@ class _SignupScreenState extends State<SignupScreen> {
         ],
       ),
       body: SingleChildScrollView(
-        padding: EdgeInsets.only(top: 60, left: 24, right: 24),
+        padding: const EdgeInsets.only(top: 60, left: 24, right: 24),
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -75,9 +75,9 @@ class _SignupScreenState extends State<SignupScreen> {
                 size: 80,
                 color: Theme.of(context).colorScheme.primary,
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               Text(
-                "Welcome to movie player",
+                'Welcome to movie player',
                 style: TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
@@ -85,12 +85,12 @@ class _SignupScreenState extends State<SignupScreen> {
                 ),
                 textAlign: TextAlign.center,
               ),
-              SizedBox(height: 8),
+              const SizedBox(height: 8),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    "Already have an account? ",
+                    'Already have an account? ',
                     style: TextStyle(
                       fontSize: 14,
                       color: Theme.of(context).colorScheme.onSurface,
@@ -107,7 +107,7 @@ class _SignupScreenState extends State<SignupScreen> {
                       );
                     },
                     child: Text(
-                      "Or Log in instead from here",
+                      'Or Log in instead from here',
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
@@ -118,9 +118,9 @@ class _SignupScreenState extends State<SignupScreen> {
                   ),
                 ],
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               Container(
-                padding: EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                 decoration: BoxDecoration(
                   color: Colors.amber.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
@@ -133,14 +133,14 @@ class _SignupScreenState extends State<SignupScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Padding(
-                      padding: EdgeInsets.only(top: 2),
+                      padding: const EdgeInsets.only(top: 2),
                       child: Icon(
                         Icons.warning_amber_rounded,
                         color: Colors.amber[800] ?? Colors.amber,
                         size: 22,
                       ),
                     ),
-                    SizedBox(width: 10),
+                    const SizedBox(width: 10),
                     Expanded(
                       child: Text(
                         "This app isn't intended for anyone below 18 years old. this app contains a large database of movies that might contain R-rated themes, Violence or immoral ideas. Always make sure to search for Parents guides and Trigger Warnings for the movie you want to watch. Safe Browsing!",
@@ -155,25 +155,25 @@ class _SignupScreenState extends State<SignupScreen> {
                   ],
                 ),
               ),
-              SizedBox(height: 25),
+              const SizedBox(height: 25),
               TextField(
                 controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
-                autofillHints: [AutofillHints.email],
-                decoration: InputDecoration(
+                autofillHints: const [AutofillHints.email],
+                decoration: const InputDecoration(
                   border: OutlineInputBorder(),
                   prefixIcon: Icon(Icons.email),
-                  labelText: "Email",
+                  labelText: 'Email',
                 ),
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               TextField(
                 controller: _passwordController,
                 obscureText: obscureText,
                 decoration: InputDecoration(
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.key),
-                  labelText: "Password",
+                  border: const OutlineInputBorder(),
+                  prefixIcon: const Icon(Icons.key),
+                  labelText: 'Password',
                   suffixIcon: IconButton(
                     onPressed: () => setState(() => obscureText = !obscureText),
                     icon: Icon(
@@ -182,7 +182,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   ),
                 ),
               ),
-              SizedBox(height: 30),
+              const SizedBox(height: 30),
               SizedBox(
                 width: double.infinity,
                 height: 50,
@@ -199,20 +199,23 @@ class _SignupScreenState extends State<SignupScreen> {
                       ? SizedBox(
                           width: 24,
                           height: 24,
-                          child: CircularProgressIndicator(color: Theme.of(context).colorScheme.secondary, strokeWidth: 2.5),
+                          child: CircularProgressIndicator(
+                            color: Theme.of(context).colorScheme.secondary,
+                            strokeWidth: 2.5,
+                          ),
                         )
-                      : Text(
-                          "Sign Up",
+                      : const Text(
+                          'Sign Up',
                           style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                         ),
                 ),
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               if (authProvider.warning.isNotEmpty)
                 Text(
                   authProvider.warning,
                   style: TextStyle(
-                    color: authProvider.warning.contains("Successful")
+                    color: authProvider.warning.contains('Successful')
                         ? Colors.green
                         : Colors.red,
                     fontWeight: FontWeight.bold,

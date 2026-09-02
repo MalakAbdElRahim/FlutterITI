@@ -5,7 +5,7 @@ class MovieCard extends StatelessWidget {
   final MovieModel movie;
   final VoidCallback? onTap;
 
-  MovieCard({
+  const MovieCard({
     super.key,
     required this.movie,
     this.onTap,
@@ -16,7 +16,7 @@ class MovieCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        margin: EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+        margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
@@ -41,29 +41,29 @@ class MovieCard extends StatelessWidget {
                 ),
               ),
             ),
-            SizedBox(height: 6),
+            const SizedBox(height: 6),
             Text(
               movie.title,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: TextStyle(
+              style: const TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 13,
               ),
             ),
-            SizedBox(height: 3),
+            const SizedBox(height: 3),
             Row(
               children: [
-                Icon(Icons.star, color: Colors.amber, size: 14),
-                SizedBox(width: 3),
+                const Icon(Icons.star, color: Colors.amber, size: 14),
+                const SizedBox(width: 3),
                 Text(
                   movie.voteAverage.toStringAsFixed(1),
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                Spacer(),
+                const Spacer(),
                 Text(
                   movie.fullReleaseDate,
                   style: TextStyle(
@@ -79,4 +79,3 @@ class MovieCard extends StatelessWidget {
     );
   }
 }
-

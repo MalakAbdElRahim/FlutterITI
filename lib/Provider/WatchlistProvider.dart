@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../Model/MovieModel.dart';
-import '../Service/DatabaseServices.dart';
+import '../Database/DatabaseServices.dart';
 
 class WatchlistProvider extends ChangeNotifier {
   final DatabaseServices _dbService = DatabaseServices.instance;
@@ -35,28 +35,17 @@ class WatchlistProvider extends ChangeNotifier {
       _toWatch = await _dbService.getMoviesByListType('to_watch');
       _watched = await _dbService.getMoviesByListType('watched');
     } catch (e) {
-      debugPrint("Error loading watchlist from database: $e");
+      debugPrint('Error loading watchlist from database: $e');
     } finally {
       _isLoading = false;
       notifyListeners();
     }
   }
 
-  bool isFavorite(int movieId) {
-    return _favorites.any((m) => m.id == movieId);
-  }
-
-  bool isWatching(int movieId) {
-    return _watching.any((m) => m.id == movieId);
-  }
-
-  bool isToWatch(int movieId) {
-    return _toWatch.any((m) => m.id == movieId);
-  }
-
-  bool isWatched(int movieId) {
-    return _watched.any((m) => m.id == movieId);
-  }
+  bool isFavorite(int movieId) => _favorites.any((m) => m.id == movieId);
+  bool isWatching(int movieId) => _watching.any((m) => m.id == movieId);
+  bool isToWatch(int movieId) => _toWatch.any((m) => m.id == movieId);
+  bool isWatched(int movieId) => _watched.any((m) => m.id == movieId);
 
   Future<bool> toggleFavorite(MovieModel movie) async {
     final exists = isFavorite(movie.id);

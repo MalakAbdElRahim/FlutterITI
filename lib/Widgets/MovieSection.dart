@@ -8,7 +8,7 @@ class MovieSection extends StatelessWidget {
   final List<MovieModel> movies;
   final VoidCallback toggleTheme;
 
-  MovieSection({
+  const MovieSection({
     super.key,
     required this.title,
     required this.movies,
@@ -18,17 +18,17 @@ class MovieSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (movies.isEmpty) {
-      return SizedBox.shrink();
+      return const SizedBox.shrink();
     }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: Text(
             title,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
             ),
@@ -38,8 +38,8 @@ class MovieSection extends StatelessWidget {
           height: 285,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
-            physics: BouncingScrollPhysics(),
-            padding: EdgeInsets.symmetric(horizontal: 8),
+            physics: const BouncingScrollPhysics(),
+            padding: const EdgeInsets.symmetric(horizontal: 8),
             itemCount: movies.length,
             itemBuilder: (context, index) {
               final movie = movies[index];
@@ -63,7 +63,7 @@ class MovieSection extends StatelessWidget {
             },
           ),
         ),
-        SizedBox(height: 12),
+        const SizedBox(height: 12),
       ],
     );
   }

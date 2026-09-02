@@ -36,7 +36,7 @@ class _LoginScreenState extends State<LoginScreen> {
         context,
         MaterialPageRoute(
           builder: (context) => HomePage(
-            title: "Main Page",
+            title: 'Main Page',
             toggleTheme: widget.toggleTheme,
           ),
         ),
@@ -52,8 +52,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          "Movie player",
+        title: const Text(
+          'Movie player',
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         actions: [
@@ -65,7 +65,7 @@ class _LoginScreenState extends State<LoginScreen> {
         ],
       ),
       body: SingleChildScrollView(
-        padding: EdgeInsets.only(top: 60, left: 24, right: 24),
+        padding: const EdgeInsets.only(top: 60, left: 24, right: 24),
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -75,9 +75,9 @@ class _LoginScreenState extends State<LoginScreen> {
                 size: 80,
                 color: Theme.of(context).colorScheme.primary,
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               Text(
-                "Welcome to movie player",
+                'Welcome to movie player',
                 style: TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
@@ -85,12 +85,12 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 textAlign: TextAlign.center,
               ),
-              SizedBox(height: 8),
+              const SizedBox(height: 8),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    "If you are new, you can register ",
+                    'If you are new, you can register ',
                     style: TextStyle(
                       fontSize: 14,
                       color: Theme.of(context).colorScheme.onSurface,
@@ -107,7 +107,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       );
                     },
                     child: Text(
-                      "here",
+                      'here',
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
@@ -118,25 +118,25 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ],
               ),
-              SizedBox(height: 35),
+              const SizedBox(height: 35),
               TextField(
                 controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
-                autofillHints: [AutofillHints.email],
-                decoration: InputDecoration(
+                autofillHints: const [AutofillHints.email],
+                decoration: const InputDecoration(
                   border: OutlineInputBorder(),
                   prefixIcon: Icon(Icons.email),
-                  labelText: "Email",
+                  labelText: 'Email',
                 ),
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               TextField(
                 controller: _passwordController,
                 obscureText: obscureText,
                 decoration: InputDecoration(
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.key),
-                  labelText: "Password",
+                  border: const OutlineInputBorder(),
+                  prefixIcon: const Icon(Icons.key),
+                  labelText: 'Password',
                   suffixIcon: IconButton(
                     onPressed: () => setState(() => obscureText = !obscureText),
                     icon: Icon(
@@ -145,7 +145,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
               ),
-              SizedBox(height: 30),
+              const SizedBox(height: 30),
               SizedBox(
                 width: double.infinity,
                 height: 50,
@@ -162,20 +162,23 @@ class _LoginScreenState extends State<LoginScreen> {
                       ? SizedBox(
                           width: 24,
                           height: 24,
-                          child: CircularProgressIndicator(color: Theme.of(context).colorScheme.secondary,strokeWidth: 2.5),
+                          child: CircularProgressIndicator(
+                            color: Theme.of(context).colorScheme.secondary,
+                            strokeWidth: 2.5,
+                          ),
                         )
-                      : Text(
-                          "Log In",
+                      : const Text(
+                          'Log In',
                           style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                         ),
                 ),
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               if (authProvider.warning.isNotEmpty)
                 Text(
                   authProvider.warning,
                   style: TextStyle(
-                    color: authProvider.warning.contains("Successful")
+                    color: authProvider.warning.contains('Successful')
                         ? Colors.green
                         : Colors.red,
                     fontWeight: FontWeight.bold,

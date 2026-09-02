@@ -13,7 +13,7 @@ class MovieController {
 
   Future<void> fetchHomeMovies() async {
     _movieProvider.setLoading(true);
-    _movieProvider.setErrorMessage("");
+    _movieProvider.setErrorMessage('');
 
     try {
       final results = await Future.wait([
@@ -29,7 +29,7 @@ class MovieController {
       );
     } catch (e) {
       _movieProvider.setLoading(false);
-      _movieProvider.setErrorMessage(e.toString().replaceAll("Exception: ", ""));
+      _movieProvider.setErrorMessage(e.toString().replaceAll('Exception: ', ''));
     }
   }
 }

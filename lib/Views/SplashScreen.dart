@@ -19,13 +19,17 @@ class _SplashScreenState extends State<SplashScreen> {
   bool _isInitialized = false;
   bool _showLogoPhase = true;
   bool _hasNavigated = false;
+  Timer? _failsafeTimer;
 
   @override
   void initState() {
     super.initState();
     _initializeAndPlay();
-    // Absolute failsafe: Never stay stuck on splash screen longer than 6 seconds
-    Timer(const Duration(seconds: 6), () {
+  }
+
+  void _startFailsafe(Duration timeout) {
+    _failsafeTimer?.cancel();
+    _failsafeTimer = Timer(timeout, () {
       if (mounted && !_hasNavigated) {
         _navigateNext();
       }
@@ -36,7 +40,7 @@ class _SplashScreenState extends State<SplashScreen> {
     _controller = VideoPlayerController.asset('assets/videos/splash.mp4');
 
     try {
-      await _controller.initialize().timeout(const Duration(seconds: 3));
+      await _controller.initialize().timeout(const Duration(seconds: 5));
       await _controller.setVolume(0.0);
       _controller.setLooping(false);
 
@@ -45,34 +49,37 @@ class _SplashScreenState extends State<SplashScreen> {
           _isInitialized = true;
         });
       }
-      Timer(const Duration(milliseconds: 2200), () {
+
+      final videoDurationMs = _controller.value.duration.inMilliseconds;
+      const logoPhaseMs = 2200;
+      final totalMs = logoPhaseMs + videoDurationMs + 2000;
+      _startFailsafe(Duration(milliseconds: totalMs));
+
+      Timer(const Duration(milliseconds: logoPhaseMs), () {
         if (!mounted) return;
         setState(() {
           _showLogoPhase = false;
         });
 
         _controller.play();
+
         _controller.addListener(() {
-          if (_controller.value.isInitialized &&
-              _controller.value.position >= _controller.value.duration) {
+          final value = _controller.value;
+          if (value.isInitialized &&
+              !value.hasError &&
+              value.duration > Duration.zero &&
+              value.position >= value.duration) {
             _navigateNext();
           }
         });
-        final duration = _controller.value.duration.inSeconds > 0
-            ? _controller.value.duration.inSeconds + 1
-            : 4;
-        Timer(Duration(seconds: duration), () {
-          _navigateNext();
-        });
       });
     } catch (e) {
+      _startFailsafe(const Duration(milliseconds: 5200));
+
       Timer(const Duration(milliseconds: 2200), () {
         if (!mounted) return;
         setState(() {
           _showLogoPhase = false;
-        });
-        Timer(const Duration(seconds: 3), () {
-          _navigateNext();
         });
       });
     }
@@ -81,28 +88,22 @@ class _SplashScreenState extends State<SplashScreen> {
   void _navigateNext() {
     if (!mounted || _hasNavigated) return;
     _hasNavigated = true;
+    _failsafeTimer?.cancel();
     try {
       final user = FirebaseAuth.instance.currentUser;
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
           builder: (context) => user != null
-              ? HomePage(
-                  title: "Main Page",
-                  toggleTheme: widget.toggleTheme,
-                )
-              : LoginScreen(
-                  toggleTheme: widget.toggleTheme,
-                ),
+              ? HomePage(title: 'Main Page', toggleTheme: widget.toggleTheme)
+              : LoginScreen(toggleTheme: widget.toggleTheme),
         ),
       );
     } catch (_) {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) => LoginScreen(
-            toggleTheme: widget.toggleTheme,
-          ),
+          builder: (context) => LoginScreen(toggleTheme: widget.toggleTheme),
         ),
       );
     }
@@ -110,6 +111,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
   @override
   void dispose() {
+    _failsafeTimer?.cancel();
     if (_isInitialized) {
       _controller.dispose();
     }
@@ -122,14 +124,14 @@ class _SplashScreenState extends State<SplashScreen> {
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Center(
         child: AnimatedSwitcher(
-          duration: Duration(milliseconds: 600),
+          duration: const Duration(milliseconds: 600),
           child: _showLogoPhase
               ? Column(
-                  key: ValueKey('logo_phase'),
+                  key: const ValueKey('logo_phase'),
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      "Movies Data is provided by",
+                      'Movies Data is provided by',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w500,
@@ -137,16 +139,12 @@ class _SplashScreenState extends State<SplashScreen> {
                         letterSpacing: 1.2,
                       ),
                     ),
-                    SizedBox(height: 20),
-                    SvgPicture.asset(
-                      'assets/images/TMDB.svg',
-                      width: 160,
-                    ),
+                    const SizedBox(height: 20),
+                    SvgPicture.asset('assets/images/TMDB.svg', width: 160),
                   ],
                 )
-
               : Column(
-                  key: ValueKey('video_phase'),
+                  key: const ValueKey('video_phase'),
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     if (_isInitialized && !_controller.value.hasError)
@@ -167,9 +165,9 @@ class _SplashScreenState extends State<SplashScreen> {
                         size: 100,
                         color: Theme.of(context).colorScheme.primary,
                       ),
-                    SizedBox(height: 30),
+                    const SizedBox(height: 30),
                     Text(
-                      "the curtains are opening...",
+                      'the curtains are opening...',
                       style: TextStyle(
                         fontSize: 14,
                         fontStyle: FontStyle.italic,
@@ -177,7 +175,7 @@ class _SplashScreenState extends State<SplashScreen> {
                         letterSpacing: 1.1,
                       ),
                     ),
-                    SizedBox(height: 24),
+                    const SizedBox(height: 24),
                     CircularProgressIndicator(
                       color: Theme.of(context).colorScheme.primary,
                       backgroundColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),

@@ -1,100 +1,60 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../Service/FirebaseAuthService.dart';
 import '../Provider/WatchlistProvider.dart';
-import '../Widgets/MovieCard.dart';
+import '../Widgets/MovieGridView.dart';
+import '../Widgets/EmptyStateWidget.dart';
 import 'MovieDetailsScreen.dart';
-import 'LoginScreen.dart';
 
-class WatchingScreen extends StatefulWidget {
+class WatchingScreen extends StatelessWidget {
   final VoidCallback toggleTheme;
   final String title;
 
-  WatchingScreen({
+  const WatchingScreen({
     super.key,
     required this.title,
     required this.toggleTheme,
   });
 
   @override
-  State<WatchingScreen> createState() => _WatchingScreenState();
-}
-
-class _WatchingScreenState extends State<WatchingScreen> {
-  final FirebaseAuthService _authService = FirebaseAuthService();
-
-  @override
   Widget build(BuildContext context) {
-    bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final watchlistProvider = context.watch<WatchlistProvider>();
     final movies = watchlistProvider.watching;
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title),
+        title: Text(title),
         actions: [
           IconButton(
             icon: Icon(isDarkMode ? Icons.light_mode : Icons.dark_mode),
             tooltip: 'Toggle Theme',
-            onPressed: widget.toggleTheme,
+            onPressed: toggleTheme,
           ),
         ],
         leading: IconButton(
-          icon: Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back),
           tooltip: 'Back',
-          onPressed: () {
-            Navigator.pop(context);
-          },
+          onPressed: () => Navigator.pop(context),
         ),
       ),
       body: movies.isEmpty
-          ? Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.play_circle_outline, size: 64, color: Colors.blueAccent),
-                  SizedBox(height: 16),
-                  Text(
-                    "No Movies Currently Watching",
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                  ),
-                  SizedBox(height: 8),
-                  Text(
-                    "Mark movies as 'Watching' to track what you're currently viewing",
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
-                    ),
-                  ),
-                ],
-              ),
+          ? const EmptyStateWidget(
+              icon: Icons.play_circle_outline,
+              iconColor: Colors.blueAccent,
+              title: 'No Movies Currently Watching',
+              subtitle: "Mark movies as 'Watching' to track what you're currently viewing",
             )
-          : GridView.builder(
-              padding: EdgeInsets.all(12),
-              physics: BouncingScrollPhysics(),
-              gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                maxCrossAxisExtent: 180,
-                childAspectRatio: 0.48,
-                crossAxisSpacing: 12,
-                mainAxisSpacing: 12,
+          : MovieGridView(
+              movies: movies,
+              onMovieTap: (movie) => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => MovieDetailsScreen(
+                    movie: movie,
+                    toggleTheme: toggleTheme,
+                  ),
+                ),
               ),
-              itemCount: movies.length,
-              itemBuilder: (context, index) {
-                final movie = movies[index];
-                return MovieCard(
-                  movie: movie,
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => MovieDetailsScreen(
-                          movie: movie,
-                          toggleTheme: widget.toggleTheme,
-                        ),
-                      ),
-                    );
-                  },
-                );
-              },
             ),
     );
   }

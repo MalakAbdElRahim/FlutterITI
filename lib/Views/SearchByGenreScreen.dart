@@ -1,28 +1,45 @@
 import 'package:flutter/material.dart';
-import '../Service/TMDBApiService.dart';
-import '../Model/GenreModel.dart';
+import 'package:provider/provider.dart';
+import '../Provider/GenreProvider.dart';
+import '../Controller/GenreController.dart';
+import '../Widgets/LoadingWidget.dart';
+import '../Widgets/ErrorRetryWidget.dart';
 import 'GenreMoviesScreen.dart';
 
-class SearchByGenreScreen extends StatefulWidget {
+class SearchByGenreScreen extends StatelessWidget {
   final VoidCallback toggleTheme;
 
-  SearchByGenreScreen({
-    super.key,
-    required this.toggleTheme,
-  });
+  const SearchByGenreScreen({super.key, required this.toggleTheme});
 
   @override
-  State<SearchByGenreScreen> createState() => _SearchByGenreScreenState();
+  Widget build(BuildContext context) {
+    return ChangeNotifierProvider(
+      create: (_) => GenreProvider(),
+      child: _SearchByGenreView(toggleTheme: toggleTheme),
+    );
+  }
 }
 
-class _SearchByGenreScreenState extends State<SearchByGenreScreen> {
-  final TMDBApiService _apiService = TMDBApiService();
-  late Future<List<Genre>> _genresFuture;
+class _SearchByGenreView extends StatefulWidget {
+  final VoidCallback toggleTheme;
+
+  const _SearchByGenreView({required this.toggleTheme});
+
+  @override
+  State<_SearchByGenreView> createState() => _SearchByGenreViewState();
+}
+
+class _SearchByGenreViewState extends State<_SearchByGenreView> {
+  late GenreController _controller;
 
   @override
   void initState() {
     super.initState();
-    _genresFuture = _apiService.getGenres();
+    final provider = Provider.of<GenreProvider>(context, listen: false);
+    _controller = GenreController(provider: provider);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _controller.fetchGenres();
+    });
   }
 
   IconData _getGenreIcon(String name) {
@@ -72,7 +89,7 @@ class _SearchByGenreScreenState extends State<SearchByGenreScreen> {
   }
 
   Color _getGenreColor(int index) {
-    final colors = [
+    const colors = [
       Colors.orange,
       Colors.green,
       Colors.pink,
@@ -97,10 +114,11 @@ class _SearchByGenreScreenState extends State<SearchByGenreScreen> {
   @override
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final provider = context.watch<GenreProvider>();
 
     return Scaffold(
       appBar: AppBar(
-        title: Text("Search by Genre"),
+        title: const Text('Search by Genre'),
         actions: [
           IconButton(
             icon: Icon(isDarkMode ? Icons.light_mode : Icons.dark_mode),
@@ -109,137 +127,100 @@ class _SearchByGenreScreenState extends State<SearchByGenreScreen> {
           ),
         ],
       ),
-      body: FutureBuilder<List<Genre>>(
-        future: _genresFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(
-              child: CircularProgressIndicator(
-                color: Theme.of(context).colorScheme.primary,
-              ),
-            );
-          }
-
-          if (snapshot.hasError) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.error_outline, color: Colors.red, size: 48),
-                  SizedBox(height: 12),
-                  Text("Failed to load genres"),
-                  SizedBox(height: 12),
-                  ElevatedButton(
-                    onPressed: () {
-                      setState(() {
-                        _genresFuture = _apiService.getGenres();
-                      });
-                    },
-                    child: Text("Retry"),
-                  ),
-                ],
-              ),
-            );
-          }
-
-          final genres = snapshot.data ?? [];
-
-          return Padding(
-            padding: EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  "Select a Genre",
-                  style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                SizedBox(height: 6),
-                Text(
-                  "Browse movies by your favorite category",
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
-                  ),
-                ),
-                SizedBox(height: 16),
-                Expanded(
-                  child: GridView.builder(
-                    physics: BouncingScrollPhysics(),
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      crossAxisSpacing: 12,
-                      mainAxisSpacing: 12,
-                      childAspectRatio: 2.2,
-                    ),
-                    itemCount: genres.length,
-                    itemBuilder: (context, index) {
-                      final genre = genres[index];
-                      final Color genreColor = _getGenreColor(index);
-                      final IconData genreIcon = _getGenreIcon(genre.name);
-
-                      return InkWell(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => GenreMoviesScreen(
-                                genreId: genre.id,
-                                genreName: genre.name,
-                                toggleTheme: widget.toggleTheme,
-                              ),
-                            ),
-                          );
-                        },
-                        borderRadius: BorderRadius.circular(12),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: genreColor.withValues(alpha: 0.15),
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                              color: genreColor.withValues(alpha: 0.4),
-                              width: 1.5,
-                            ),
+      body: provider.isLoading
+          ? const LoadingWidget()
+          : provider.errorMessage.isNotEmpty
+              ? ErrorRetryWidget(
+                  message: provider.errorMessage,
+                  onRetry: _controller.fetchGenres,
+                )
+              : Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Select a Genre',
+                        style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        'Browse movies by your favorite category',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Expanded(
+                        child: GridView.builder(
+                          physics: const BouncingScrollPhysics(),
+                          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            crossAxisSpacing: 12,
+                            mainAxisSpacing: 12,
+                            childAspectRatio: 2.2,
                           ),
-                          padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                          child: Row(
-                            children: [
-                              Container(
-                                padding: EdgeInsets.all(8),
+                          itemCount: provider.genres.length,
+                          itemBuilder: (context, index) {
+                            final genre = provider.genres[index];
+                            final genreColor = _getGenreColor(index);
+                            final genreIcon = _getGenreIcon(genre.name);
+
+                            return InkWell(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => GenreMoviesScreen(
+                                      genreId: genre.id,
+                                      genreName: genre.name,
+                                      toggleTheme: widget.toggleTheme,
+                                    ),
+                                  ),
+                                );
+                              },
+                              borderRadius: BorderRadius.circular(12),
+                              child: Container(
                                 decoration: BoxDecoration(
-                                  color: genreColor.withValues(alpha: 0.2),
-                                  shape: BoxShape.circle,
-                                ),
-                                child: Icon(
-                                  genreIcon,
-                                  color: genreColor,
-                                  size: 20,
-                                ),
-                              ),
-                              SizedBox(width: 10),
-                              Expanded(
-                                child: Text(
-                                  genre.name,
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.bold,
+                                  color: genreColor.withValues(alpha: 0.15),
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: genreColor.withValues(alpha: 0.4),
+                                    width: 1.5,
                                   ),
                                 ),
+                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.all(8),
+                                      decoration: BoxDecoration(
+                                        color: genreColor.withValues(alpha: 0.2),
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: Icon(genreIcon, color: genreColor, size: 20),
+                                    ),
+                                    const SizedBox(width: 10),
+                                    Expanded(
+                                      child: Text(
+                                        genre.name,
+                                        style: const TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ],
-                          ),
+                            );
+                          },
                         ),
-                      );
-                    },
+                      ),
+                    ],
                   ),
                 ),
-              ],
-            ),
-          );
-        },
-      ),
     );
   }
 }
