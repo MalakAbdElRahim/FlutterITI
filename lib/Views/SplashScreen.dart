@@ -149,7 +149,7 @@ class _SplashScreenState extends State<SplashScreen> {
                   key: ValueKey('video_phase'),
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    if (_isInitialized)
+                    if (_isInitialized && !_controller.value.hasError)
                       SizedBox(
                         width: 250,
                         height: 250,

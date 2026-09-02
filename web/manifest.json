@@ -1,6 +1,6 @@
 {
-    "name": "iti_project",
-    "short_name": "iti_project",
+    "name": "One Tap Cinema",
+    "short_name": "1TC",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
