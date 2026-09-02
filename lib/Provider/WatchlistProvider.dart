@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../Model/MovieModel.dart';
 import '../Service/DatabaseServices.dart';
@@ -19,6 +20,9 @@ class WatchlistProvider extends ChangeNotifier {
 
   WatchlistProvider() {
     loadAllLists();
+    FirebaseAuth.instance.authStateChanges().listen((user) {
+      loadAllLists();
+    });
   }
 
   Future<void> loadAllLists() async {

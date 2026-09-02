@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
@@ -9,6 +10,8 @@ class DatabaseServices {
 
   static Database? _database;
   final SharedPService _webStorage = SharedPService.instance;
+
+  String get _currentUserId => FirebaseAuth.instance.currentUser?.uid ?? 'guest';
 
   Future<Database?> get database async {
     if (kIsWeb) return null;
@@ -29,8 +32,14 @@ class DatabaseServices {
 
     return openDatabase(
       path,
-      version: 1,
+      version: 2,
       onCreate: _createDatabase,
+      onUpgrade: (db, oldVersion, newVersion) async {
+        if (oldVersion < 2) {
+          await db.execute('DROP TABLE IF EXISTS user_movies');
+          await _createDatabase(db, newVersion);
+        }
+      },
     );
   }
 
@@ -38,6 +47,7 @@ class DatabaseServices {
     await db.execute('''
       CREATE TABLE user_movies(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id TEXT NOT NULL,
         movie_id INTEGER NOT NULL,
         title TEXT NOT NULL,
         poster_path TEXT,
@@ -46,7 +56,7 @@ class DatabaseServices {
         release_date TEXT,
         overview TEXT,
         list_type TEXT NOT NULL,
-        UNIQUE(movie_id, list_type)
+        UNIQUE(user_id, movie_id, list_type)
       )
     ''');
   }
@@ -54,13 +64,15 @@ class DatabaseServices {
   // --- Public Operations ---
 
   Future<int> addMovieToList(MovieModel movie, String listType) async {
+    final uid = _currentUserId;
     if (kIsWeb) {
-      return await _webStorage.addMovie(movie, listType);
+      return await _webStorage.addMovie(movie, listType, userId: uid);
     }
 
     final db = await database;
     if (db != null) {
       final row = {
+        'user_id': uid,
         'movie_id': movie.id,
         'title': movie.title,
         'poster_path': movie.posterPath,
@@ -81,8 +93,9 @@ class DatabaseServices {
   }
 
   Future<void> removeMovieFromList(int movieId, String listType) async {
+    final uid = _currentUserId;
     if (kIsWeb) {
-      await _webStorage.removeMovie(movieId, listType);
+      await _webStorage.removeMovie(movieId, listType, userId: uid);
       return;
     }
 
@@ -90,23 +103,24 @@ class DatabaseServices {
     if (db != null) {
       await db.delete(
         'user_movies',
-        where: 'movie_id = ? AND list_type = ?',
-        whereArgs: [movieId, listType],
+        where: 'user_id = ? AND movie_id = ? AND list_type = ?',
+        whereArgs: [uid, movieId, listType],
       );
     }
   }
 
   Future<bool> isMovieInList(int movieId, String listType) async {
+    final uid = _currentUserId;
     if (kIsWeb) {
-      return await _webStorage.isMovieInList(movieId, listType);
+      return await _webStorage.isMovieInList(movieId, listType, userId: uid);
     }
 
     final db = await database;
     if (db != null) {
       final data = await db.query(
         'user_movies',
-        where: 'movie_id = ? AND list_type = ?',
-        whereArgs: [movieId, listType],
+        where: 'user_id = ? AND movie_id = ? AND list_type = ?',
+        whereArgs: [uid, movieId, listType],
       );
       return data.isNotEmpty;
     }
@@ -114,8 +128,9 @@ class DatabaseServices {
   }
 
   Future<List<String>> getMovieLists(int movieId) async {
+    final uid = _currentUserId;
     if (kIsWeb) {
-      return await _webStorage.getMovieLists(movieId);
+      return await _webStorage.getMovieLists(movieId, userId: uid);
     }
 
     final db = await database;
@@ -123,8 +138,8 @@ class DatabaseServices {
       final data = await db.query(
         'user_movies',
         columns: ['list_type'],
-        where: 'movie_id = ?',
-        whereArgs: [movieId],
+        where: 'user_id = ? AND movie_id = ?',
+        whereArgs: [uid, movieId],
       );
       return data.map((row) => row['list_type'] as String).toList();
     }
@@ -132,8 +147,9 @@ class DatabaseServices {
   }
 
   Future<List<MovieModel>> getMoviesByListType(String listType) async {
+    final uid = _currentUserId;
     if (kIsWeb) {
-      return await _webStorage.getMoviesByListType(listType);
+      return await _webStorage.getMoviesByListType(listType, userId: uid);
     }
 
     final db = await database;
@@ -141,10 +157,10 @@ class DatabaseServices {
     if (db != null) {
       rows = await db.query(
         'user_movies',
-        where: 'list_type = ?',
-        whereArgs: [listType],
+        where: 'user_id = ? AND list_type = ?',
+        whereArgs: [uid, listType],
       );
-   }
+    }
 
     return rows.map<MovieModel>((row) {
       return MovieModel.fromJson({

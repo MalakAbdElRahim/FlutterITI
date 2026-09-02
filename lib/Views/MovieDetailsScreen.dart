@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../Model/MovieModel.dart';
 import '../Model/CastModel.dart';
 import '../Service/TMDBApiService.dart';
@@ -27,6 +28,27 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
   void initState() {
     super.initState();
     _detailsFuture = _apiService.getMovieDetailsFull(widget.movie.id);
+  }
+
+  Future<void> _searchOnline(String query) async {
+    final encodedQuery = Uri.encodeComponent(query);
+    final url = Uri.parse("https://www.google.com/search?q=$encodedQuery");
+    try {
+      if (await canLaunchUrl(url)) {
+        await launchUrl(url, mode: LaunchMode.externalApplication);
+      } else {
+        await launchUrl(url);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Could not open browser: $e"),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    }
   }
 
   String _formatCurrency(num amount) {
@@ -257,7 +279,6 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Rating, Release Date & Runtime Row
                       Row(
                         children: [
                           Icon(Icons.star_rounded, color: Colors.amber, size: 24),
@@ -307,8 +328,6 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                       ),
 
                       SizedBox(height: 16),
-
-                      // Action Buttons Directly Below The Photo
                       Row(
                         children: [
                           _buildActionButton(
@@ -409,8 +428,6 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                           ),
                         ),
                       ],
-
-                      // Genre Badges
                       if (genres.isNotEmpty) ...[
                         SizedBox(height: 14),
                         Wrap(
@@ -483,8 +500,6 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                           ),
                         ),
                       ],
-
-                      // Directors / Key Crew
                       if (directors.isNotEmpty) ...[
                         SizedBox(height: 16),
                         Row(
@@ -512,8 +527,6 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                       ],
 
                       SizedBox(height: 20),
-
-                      // Additional Information Table
                       Text(
                         "Information",
                         style: TextStyle(
@@ -563,6 +576,57 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                             ),
                           ],
                         ),
+                      ),
+
+                      SizedBox(height: 24),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: ElevatedButton.icon(
+                              onPressed: () => _searchOnline("${widget.movie.title} trigger warnings"),
+                              icon: Icon(Icons.search, size: 18),
+                              label: Text(
+                                "Trigger Warning",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 13,
+                                ),
+                              ),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Theme.of(context).colorScheme.primary,
+                                foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                                padding: EdgeInsets.symmetric(vertical: 14),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                elevation: 2,
+                              ),
+                            ),
+                          ),
+                          SizedBox(width: 12),
+                          Expanded(
+                            child: ElevatedButton.icon(
+                              onPressed: () => _searchOnline("${widget.movie.title} parents guide"),
+                              icon: Icon(Icons.search, size: 18),
+                              label: Text(
+                                "Parent Guide",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 13,
+                                ),
+                              ),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Theme.of(context).colorScheme.secondary,
+                                foregroundColor: Theme.of(context).colorScheme.onSecondary,
+                                padding: EdgeInsets.symmetric(vertical: 14),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                elevation: 2,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
 
                       SizedBox(height: 30),

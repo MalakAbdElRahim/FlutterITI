@@ -33,8 +33,9 @@ class SharedPService {
     }
   }
 
-  Future<int> addMovie(MovieModel movie, String listType) async {
+  Future<int> addMovie(MovieModel movie, String listType, {String userId = 'guest'}) async {
     final row = {
+      'user_id': userId,
       'movie_id': movie.id,
       'title': movie.title,
       'poster_path': movie.posterPath,
@@ -47,39 +48,56 @@ class SharedPService {
 
     final movies = await _getWebMovies();
     movies.removeWhere(
-      (m) => m['movie_id'] == movie.id && m['list_type'] == listType,
+      (m) =>
+          (m['user_id'] == userId || (userId == 'guest' && m['user_id'] == null)) &&
+          m['movie_id'] == movie.id &&
+          m['list_type'] == listType,
     );
     movies.add(row);
     await _saveWebMovies(movies);
     return 1;
   }
 
-  Future<void> removeMovie(int movieId, String listType) async {
+  Future<void> removeMovie(int movieId, String listType, {String userId = 'guest'}) async {
     final movies = await _getWebMovies();
     movies.removeWhere(
-      (m) => m['movie_id'] == movieId && m['list_type'] == listType,
+      (m) =>
+          (m['user_id'] == userId || (userId == 'guest' && m['user_id'] == null)) &&
+          m['movie_id'] == movieId &&
+          m['list_type'] == listType,
     );
     await _saveWebMovies(movies);
   }
 
-  Future<bool> isMovieInList(int movieId, String listType) async {
+  Future<bool> isMovieInList(int movieId, String listType, {String userId = 'guest'}) async {
     final movies = await _getWebMovies();
     return movies.any(
-      (m) => m['movie_id'] == movieId && m['list_type'] == listType,
+      (m) =>
+          (m['user_id'] == userId || (userId == 'guest' && m['user_id'] == null)) &&
+          m['movie_id'] == movieId &&
+          m['list_type'] == listType,
     );
   }
 
-  Future<List<String>> getMovieLists(int movieId) async {
+  Future<List<String>> getMovieLists(int movieId, {String userId = 'guest'}) async {
     final movies = await _getWebMovies();
     return movies
-        .where((m) => m['movie_id'] == movieId)
+        .where(
+          (m) =>
+              (m['user_id'] == userId || (userId == 'guest' && m['user_id'] == null)) &&
+              m['movie_id'] == movieId,
+        )
         .map((m) => m['list_type'] as String)
         .toList();
   }
 
-  Future<List<MovieModel>> getMoviesByListType(String listType) async {
+  Future<List<MovieModel>> getMoviesByListType(String listType, {String userId = 'guest'}) async {
     final movies = await _getWebMovies();
-    final rows = movies.where((m) => m['list_type'] == listType).toList();
+    final rows = movies.where(
+      (m) =>
+          (m['user_id'] == userId || (userId == 'guest' && m['user_id'] == null)) &&
+          m['list_type'] == listType,
+    ).toList();
 
     return rows.map<MovieModel>((row) {
       return MovieModel.fromJson({
