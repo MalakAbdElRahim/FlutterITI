@@ -1,45 +1,29 @@
 import 'package:flutter/foundation.dart';
-import 'package:sqflite_common_ffi/sqflite_ffi.dart';
-import 'package:sqflite_common_ffi_web/sqflite_ffi_web.dart';
+import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import '../Model/MovieModel.dart';
+import 'SharedPService.dart';
 
 class DatabaseServices {
   static final DatabaseServices instance = DatabaseServices();
 
   static Database? _database;
-  static bool _factoryInitialized = false;
-
-  final List<Map<String, dynamic>> _inMemoryStore = [];
+  final SharedPService _webStorage = SharedPService.instance;
 
   Future<Database?> get database async {
-    if (_database != null) {
-      return _database;
-    }
+    if (kIsWeb) return null;
+    if (_database != null) return _database;
 
     try {
-      
       _database = await _initDatabase();
       return _database;
     } catch (e) {
-      debugPrint("SQLite initialization fallback: $e");
+      debugPrint("SQLite initialization error: $e");
       return null;
     }
   }
 
   Future<Database> _initDatabase() async {
-    if (!_factoryInitialized) {
-      if (kIsWeb) {
-        databaseFactory = databaseFactoryFfiWebNoWebWorker;
-      } else if (defaultTargetPlatform == TargetPlatform.windows ||
-          defaultTargetPlatform == TargetPlatform.linux ||
-          defaultTargetPlatform == TargetPlatform.macOS) {
-        sqfliteFfiInit();
-        databaseFactory = databaseFactoryFfi;
-      }
-      _factoryInitialized = true;
-    }
-
     final databasePath = await getDatabasesPath();
     final path = join(databasePath, 'movies.db');
 
@@ -67,33 +51,41 @@ class DatabaseServices {
     ''');
   }
 
-  Future<int> addMovieToList(MovieModel movie, String listType) async {
-    final db = await database;
-    final row = {
-      'movie_id': movie.id,
-      'title': movie.title,
-      'poster_path': movie.posterPath,
-      'backdrop_path': movie.backdropPath,
-      'vote_average': movie.voteAverage,
-      'release_date': movie.releaseDate != null ? movie.fullReleaseDate : null,
-      'overview': movie.overview,
-      'list_type': listType,
-    };
+  // --- Public Operations ---
 
+  Future<int> addMovieToList(MovieModel movie, String listType) async {
+    if (kIsWeb) {
+      return await _webStorage.addMovie(movie, listType);
+    }
+
+    final db = await database;
     if (db != null) {
+      final row = {
+        'movie_id': movie.id,
+        'title': movie.title,
+        'poster_path': movie.posterPath,
+        'backdrop_path': movie.backdropPath,
+        'vote_average': movie.voteAverage,
+        'release_date': movie.releaseDate != null ? movie.fullReleaseDate : null,
+        'overview': movie.overview,
+        'list_type': listType,
+      };
+
       return await db.insert(
         'user_movies',
         row,
         conflictAlgorithm: ConflictAlgorithm.replace,
       );
-    } else {
-      _inMemoryStore.removeWhere((m) => m['movie_id'] == movie.id && m['list_type'] == listType);
-      _inMemoryStore.add(row);
-      return 1;
     }
+    return 0;
   }
 
   Future<void> removeMovieFromList(int movieId, String listType) async {
+    if (kIsWeb) {
+      await _webStorage.removeMovie(movieId, listType);
+      return;
+    }
+
     final db = await database;
     if (db != null) {
       await db.delete(
@@ -101,12 +93,14 @@ class DatabaseServices {
         where: 'movie_id = ? AND list_type = ?',
         whereArgs: [movieId, listType],
       );
-    } else {
-      _inMemoryStore.removeWhere((m) => m['movie_id'] == movieId && m['list_type'] == listType);
     }
   }
 
   Future<bool> isMovieInList(int movieId, String listType) async {
+    if (kIsWeb) {
+      return await _webStorage.isMovieInList(movieId, listType);
+    }
+
     final db = await database;
     if (db != null) {
       final data = await db.query(
@@ -115,12 +109,15 @@ class DatabaseServices {
         whereArgs: [movieId, listType],
       );
       return data.isNotEmpty;
-    } else {
-      return _inMemoryStore.any((m) => m['movie_id'] == movieId && m['list_type'] == listType);
     }
+    return false;
   }
 
   Future<List<String>> getMovieLists(int movieId) async {
+    if (kIsWeb) {
+      return await _webStorage.getMovieLists(movieId);
+    }
+
     final db = await database;
     if (db != null) {
       final data = await db.query(
@@ -130,15 +127,15 @@ class DatabaseServices {
         whereArgs: [movieId],
       );
       return data.map((row) => row['list_type'] as String).toList();
-    } else {
-      return _inMemoryStore
-          .where((m) => m['movie_id'] == movieId)
-          .map((m) => m['list_type'] as String)
-          .toList();
     }
+    return [];
   }
 
   Future<List<MovieModel>> getMoviesByListType(String listType) async {
+    if (kIsWeb) {
+      return await _webStorage.getMoviesByListType(listType);
+    }
+
     final db = await database;
     List<Map<String, dynamic>> rows = [];
     if (db != null) {
@@ -147,9 +144,7 @@ class DatabaseServices {
         where: 'list_type = ?',
         whereArgs: [listType],
       );
-    } else {
-      rows = _inMemoryStore.where((m) => m['list_type'] == listType).toList();
-    }
+   }
 
     return rows.map<MovieModel>((row) {
       return MovieModel.fromJson({
